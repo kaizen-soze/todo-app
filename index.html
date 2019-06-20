@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="kaizen-soze">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/6c33f441b5.js"></script>
+
+    <title>To-Do List</title>
+  </head>
+  <body>
+      <div class="container">
+        <div class="row">
+            <div class="col-2">
+            </div>
+            <div class="col-8 text-center">
+                <h1>To Do List</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-2 text-center">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle btn-block" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        View
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#">Complete</a>
+                        <a class="dropdown-item" href="#">Incomplete</a>
+                        <a class="dropdown-item active" href="#">All</a>
+                    </div>
+                </div>
+
+                <div class="dropdown" style="margin-top: 10px;">
+                    <button class="btn btn-secondary dropdown-toggle btn-block" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Priority
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#">High</a>
+                        <a class="dropdown-item" href="#">Normal</a>
+                        <a class="dropdown-item active" href="#">Low</a>
+                    </div>
+                </div>
+
+                <div class="dropdown" style="margin-top: 10px;">
+                    <button class="btn btn-secondary dropdown-toggle btn-block" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Sort Order
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#">Chronological <i class="fas fa-sort-amount-up-alt"></i></a>
+                        <a class="dropdown-item" href="#">Priority <i class="fas fa-sort-amount-up"></i></a>
+                        <a class="dropdown-item" href="#">Alphabetical <i class="fas fa-sort-alpha-up-alt"></i></a>
+                        <!-- <i class="fas fa-sort-alpha-up"></i> -->
+                    </div>
+                </div>
+
+                <span data-toggle="modal" data-target="#addTask">
+                    <button
+                        class="btn btn-outline-primary rounded-circle"
+                        type="button" style="margin-top: 250px;" 
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="Add task"
+                    >
+                        <i class="fas fa-plus 4x"></i>
+                    </button>
+                </span>
+            </div>
+            <div class="col-8 text-center">
+                <div class="container">
+                    <div class="row">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                <input type="checkbox" aria-label="Checkbox for following text input">
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" aria-label="Text input with checkbox" value="Pick up Groceries" readonly>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="button-addon2"><i class="fas fa-exclamation-triangle"></i></button>
+                            </div>
+                            <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="button-addon2">July 4, 2019</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                    <input type="checkbox" aria-label="Checkbox for following text input">
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control" aria-label="Text input with checkbox" value="Pick up Groceries" readonly>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="button-addon2">icon</button>
+                                </div>
+                                <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button" id="button-addon2">July 4, 2019</button>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Modal to add tasks -->
+      <div class="modal fade" id="addTask" tabindex="-1" role="dialog" aria-labelledby="addTaskLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskLabel">Add Task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="taskDescription" placeholder="Type your description here">
+                    </div>
+                    <select class="form-control">
+                        <option value="high">High</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="low">Low</option>
+                    </select>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <!-- Optional JavaScript -->
+    <script>
+        // Initialize all tooltips
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+  </body>
+</html>

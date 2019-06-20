@@ -64,7 +64,7 @@ When the user clicks the plus icon from the main view, a task dialog will appear
 
 The following fields are available:
 
-1. Task Summary
+1. Task Description
 
 2. Priority - Defaults to normal
 
