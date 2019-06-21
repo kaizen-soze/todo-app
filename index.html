@@ -8,6 +8,11 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Pikaday Date Picker -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+
+    <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/6c33f441b5.js"></script>
 
     <title>To-Do List</title>
@@ -70,39 +75,7 @@
                 </span>
             </div>
             <div class="col-8 text-center">
-                <div class="container">
-                    <div class="row">
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                <input type="checkbox" aria-label="Checkbox for following text input">
-                                </div>
-                            </div>
-                            <input type="text" class="form-control" aria-label="Text input with checkbox" value="Pick up Groceries" readonly>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="button-addon2"><i class="fas fa-exclamation-triangle"></i></button>
-                            </div>
-                            <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-addon2">July 4, 2019</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text">
-                                    <input type="checkbox" aria-label="Checkbox for following text input">
-                                    </div>
-                                </div>
-                                <input type="text" class="form-control" aria-label="Text input with checkbox" value="Pick up Groceries" readonly>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-addon2">icon</button>
-                                </div>
-                                <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="button" id="button-addon2">July 4, 2019</button>
-                                </div>
-                            </div>
-                        </div>
+                <div id="taskList" class="container">
                 </div>
             </div>
         </div>
@@ -123,16 +96,21 @@
                     <div class="form-group">
                         <input type="text" class="form-control" id="taskDescription" placeholder="Type your description here">
                     </div>
-                    <select class="form-control">
-                        <option value="high">High</option>
-                        <option value="normal" selected>Normal</option>
-                        <option value="low">Low</option>
-                    </select>
+                    <div class="form-group">
+                        <select class="form-control" id="prioritySelect">
+                            <option value="high">High</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="datepicker" placeholder="Click here to select a date">
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-primary" id="saveButton">Save</button>
             </div>
             </div>
         </div>
@@ -142,12 +120,84 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
 
     <!-- Optional JavaScript -->
     <script>
         // Initialize all tooltips
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
+        })
+
+        const picker = new Pikaday({ field: document.getElementById('datepicker') })
+
+        // Define references to HTML elements
+        const datepicker = document.getElementById('datepicker')
+        const prioritySelect = document.getElementById('prioritySelect')
+        const saveButton = document.getElementById('saveButton')
+        const taskDescription = document.getElementById('taskDescription')
+        const taskList = document.getElementById('taskList')
+
+        // Define an object factory that will accept our data and return a task object
+        const taskFactory = (description, priority, dueDate) => {
+            const complete = false
+            return {description, dueDate, priority, complete}
+        }
+
+        // Define a factory that returns HTML based on the contents of the task object
+        const taskHTML = (targetTask) => {
+            let taskColor = 'text-normal'
+
+            switch (targetTask.priority) {
+                case 'high':
+                    taskColor = 'text-danger'
+                break
+                case 'low':
+                    taskColor = 'text-info'
+                break
+            }
+
+            // Ternary if statement. If no date is present, do not render date button
+            const dateButton = targetTask.dueDate !== '' ? `<div class="input-group-append">
+                                    <button class="btn btn-outline-secondary ${taskColor} font-weight-bold" type="button" id="button-addon2">${targetTask.dueDate}</button>
+                                </div>` : `&nbsp;`
+
+            const html = `<div class="row">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="checkbox">
+                                </div>
+                            </div>
+                            <input type="text" class="form-control ${taskColor} font-weight-bold" value="${targetTask.description}" readonly>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary ${taskColor}" type="button" id="button-addon2"><i class="fas fa-exclamation-triangle"></i></button>
+                            </div>
+                            ${dateButton}
+                        </div>
+                    </div>`
+            return html
+        }
+
+        // Event listener for save button on form
+        saveButton.addEventListener('click', event => {
+            // Hide modal when save button is clicked
+            $('#addTask').modal('hide')
+            
+            // Define our task object
+            const task = taskFactory(taskDescription.value, prioritySelect.value, datepicker.value)
+            
+            // Generate our html
+            const htmlString = taskHTML(task)
+            const fragment = document.createRange().createContextualFragment(htmlString)
+            
+            // Add the task to the container
+            taskList.appendChild(fragment)
+
+            // Reset form elements
+            taskDescription.value = null
+            prioritySelect.value = null
+            datepicker.value = null
         })
     </script>
   </body>
