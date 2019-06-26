@@ -95,6 +95,9 @@
                 <form>
                     <div class="form-group">
                         <input type="text" class="form-control" id="taskDescription" placeholder="Type your description here">
+                        <div class="text-danger d-none" id="descriptionError">
+                            Please add a description.
+                        </div>
                     </div>
                     <div class="form-group">
                         <select class="form-control" id="prioritySelect">
@@ -102,9 +105,12 @@
                             <option value="normal" selected>Normal</option>
                             <option value="low">Low</option>
                         </select>
+                        <div class="text-danger d-none"  id="priorityError">
+                            Please choose a priority level.
+                        </div>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" id="datepicker" placeholder="Click here to select a date">
+                        <input type="text" class="form-control" id="datepicker" placeholder="Click here to select a date" readonly>
                     </div>
                 </form>
             </div>
@@ -117,6 +123,7 @@
         </div>
     </div>
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="moment.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
@@ -137,11 +144,19 @@
         const saveButton = document.getElementById('saveButton')
         const taskDescription = document.getElementById('taskDescription')
         const taskList = document.getElementById('taskList')
+        let checkboxes = document.getElementsByClassName('taskCheckbox')
+
+        const priorities = ['high', 'normal', 'low']
+        const dataLayer = []
+
+        let taskID = 1
 
         // Define an object factory that will accept our data and return a task object
         const taskFactory = (description, priority, dueDate) => {
             const complete = false
-            return {description, dueDate, priority, complete}
+            const id = taskID
+            taskID += 1
+            return {description, dueDate, priority, complete, id}
         }
 
         // Define a factory that returns HTML based on the contents of the task object
@@ -166,7 +181,7 @@
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="checkbox">
+                                    <input type="checkbox" class="taskCheckbox">
                                 </div>
                             </div>
                             <input type="text" class="form-control ${taskColor} font-weight-bold" value="${targetTask.description}" readonly>
@@ -181,23 +196,81 @@
 
         // Event listener for save button on form
         saveButton.addEventListener('click', event => {
-            // Hide modal when save button is clicked
-            $('#addTask').modal('hide')
+            // Define error divs
+            const descriptionError = document.getElementById('descriptionError')
+            const priorityError = document.getElementById('priorityError')
             
-            // Define our task object
-            const task = taskFactory(taskDescription.value, prioritySelect.value, datepicker.value)
-            
-            // Generate our html
-            const htmlString = taskHTML(task)
-            const fragment = document.createRange().createContextualFragment(htmlString)
-            
-            // Add the task to the container
-            taskList.appendChild(fragment)
+            // Check description to ensure it isn't empty. Number of characters must be greater than 0
+            let taskIsValid = true
+            if (taskDescription.value.length === 0) {
+                // display an error message
+                descriptionError.classList.remove('d-none')
 
-            // Reset form elements
-            taskDescription.value = null
-            prioritySelect.value = null
-            datepicker.value = null
+                taskIsValid = false
+                // Stop anything else from happening
+            }
+
+            // Check priority to ensure it is valid. Must be one of three preexisting options
+            if (!priorities.includes(prioritySelect.value)) {
+                // display an error message
+                priorityError.classList.remove('d-none')
+                taskIsValid = false
+            }
+            
+            // Leaving this code in case we need to check the validity
+            // of a date later
+            //
+            // // Check date to ensure it is a real date.
+            // const chosenDate = moment(datepicker.value)
+            // const isDateValid = chosenDate.format()
+            // if (isDateValid === 'Invalid date') {
+                
+            // }
+
+            // If validation fails, notify the user
+            // Otherwise, everything is fine. Carry on.
+            if (taskIsValid) {
+                // Hide modal when save button is clicked
+                $('#addTask').modal('hide')
+
+                // Define our task object
+                const task = taskFactory(taskDescription.value, prioritySelect.value, datepicker.value)
+
+                // Add our task to the data layer
+                dataLayer.push(task)
+
+                // Generate our html
+                const htmlString = taskHTML(task)
+                const fragment = document.createRange().createContextualFragment(htmlString)
+
+                // Add the task to the container
+                taskList.appendChild(fragment)
+
+                // Create a reference to the index of checkboxes in our checkbox collection
+                const cIndex = checkboxes.length - 1
+
+                // Update checkbox references
+                checkboxes = document.getElementsByClassName('taskCheckbox')
+                
+                // Create event listener for newly created checkbox (checkboxes[checkboxNumber])
+                const newCheckbox = checkboxes[cIndex]
+
+                // TODO: create event listener for newCheckbox
+                
+
+                // Reset form elements
+                taskDescription.value = null
+                prioritySelect.value = null
+                datepicker.value = null 
+
+                // Hide our error divs
+                descriptionError.classList.add('d-none')
+                priorityError.classList.add('d-none')
+            }
+
+            const createCheckboxEventListener = () => {
+
+            }
         })
     </script>
   </body>
