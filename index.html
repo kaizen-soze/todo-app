@@ -151,6 +151,33 @@
 
         let taskID = 1
 
+        // This method creates an event listener for a checkbox
+        const createCheckboxEventListener = (checkboxReference) => {
+            checkboxReference.addEventListener('click', event => {
+                // Change task object in data layer for checkbox to
+                // have completeness set to true
+
+                // Split our ID on the dash
+                const data = checkboxReference.id.split('-')
+                
+                // Grab the relevant ID from the 1st element in the array
+                const checkboxID = data[1]
+
+                // Iterate over the data layer, looking for the task we've just clicked on
+                const checkboxIndex = dataLayer.findIndex(taskIndex => taskIndex.id == checkboxID)
+                
+                // Change the value of the completeness property at datalayer[index] to true
+                const taskObject = dataLayer[checkboxIndex]
+                
+                // Set the value of complete to the opposite of what it already is
+                taskObject.complete = !taskObject.complete
+                dataLayer[checkboxIndex] = taskObject
+
+                renderDataLayer(dataLayer)
+                checkboxListeners()
+            })
+        }
+
         // Define an object factory that will accept our data and return a task object
         const taskFactory = (description, priority, dueDate) => {
             const complete = false
@@ -161,6 +188,8 @@
 
         // Define a factory that returns HTML based on the contents of the task object
         const taskHTML = (targetTask) => {
+            // TODO: Make sure that if a task is completed, the checkbox
+            // renders as checked
             let taskColor = 'text-normal'
 
             switch (targetTask.priority) {
@@ -177,14 +206,20 @@
                                     <button class="btn btn-outline-secondary ${taskColor} font-weight-bold" type="button" id="button-addon2">${targetTask.dueDate}</button>
                                 </div>` : `&nbsp;`
 
+            let description = `<input type="text" class="form-control ${taskColor} font-weight-bold" value="${targetTask.description}" readonly>`
+
+            if (targetTask.complete) {
+                description = `<s>${description}</s>`
+            }
+
             const html = `<div class="row">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="checkbox" class="taskCheckbox">
+                                    <input type="checkbox" class="taskCheckbox" id="checkbox-${targetTask.id}">
                                 </div>
                             </div>
-                            <input type="text" class="form-control ${taskColor} font-weight-bold" value="${targetTask.description}" readonly>
+                            ${description}
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary ${taskColor}" type="button" id="button-addon2"><i class="fas fa-exclamation-triangle"></i></button>
                             </div>
@@ -192,6 +227,30 @@
                         </div>
                     </div>`
             return html
+        }
+
+        const renderDataLayer = (tasks) => {
+            // Clear our task list
+            taskList.innerHTML = ''
+
+            tasks.forEach(task => {
+                // Run our tasks through our HTML factory
+                // Generate our html
+                const htmlString = taskHTML(task)
+                const fragment = document.createRange().createContextualFragment(htmlString)
+
+                // Add the task to the container
+                taskList.appendChild(fragment)    
+            });
+        }
+
+        const checkboxListeners = () => {
+            // Update checkbox references
+            checkboxes = document.getElementsByClassName('taskCheckbox')
+
+            for (let i = 0; i < checkboxes.length; i++) {
+                createCheckboxEventListener(checkboxes[i])
+            }
         }
 
         // Event listener for save button on form
@@ -246,32 +305,40 @@
                 // Add the task to the container
                 taskList.appendChild(fragment)
 
-                // Create a reference to the index of checkboxes in our checkbox collection
-                const cIndex = checkboxes.length - 1
-
                 // Update checkbox references
                 checkboxes = document.getElementsByClassName('taskCheckbox')
+
+                // Create a reference to the index of checkboxes in our checkbox collection
+                const cIndex = checkboxes.length - 1
                 
-                // Create event listener for newly created checkbox (checkboxes[checkboxNumber])
-                const newCheckbox = checkboxes[cIndex]
+                // Create event listener for newly created checkbox
+                const newestCheckbox = checkboxes[cIndex]
 
                 // TODO: create event listener for newCheckbox
-                
+                createCheckboxEventListener(newestCheckbox)
 
                 // Reset form elements
                 taskDescription.value = null
-                prioritySelect.value = null
+                prioritySelect.value = 'normal'
                 datepicker.value = null 
 
                 // Hide our error divs
                 descriptionError.classList.add('d-none')
                 priorityError.classList.add('d-none')
             }
-
-            const createCheckboxEventListener = () => {
-
-            }
         })
+
+        dataLayer[0] = taskFactory('Task One', 'normal', '')
+        dataLayer[1] = taskFactory('Task Two', 'normal', '')
+        dataLayer[2] = taskFactory('Task Three', 'normal', '')
+
+        renderDataLayer(dataLayer)
+        checkboxListeners()
+
+        
+
+        
+        
     </script>
   </body>
 </html>
