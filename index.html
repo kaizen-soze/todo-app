@@ -129,6 +129,12 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
 
+    <style>
+        .strike {
+            text-decoration: line-through;
+        }
+    </style>
+
     <!-- Optional JavaScript -->
     <script>
         // Initialize all tooltips
@@ -145,6 +151,8 @@
         const taskDescription = document.getElementById('taskDescription')
         const taskList = document.getElementById('taskList')
         let checkboxes = document.getElementsByClassName('taskCheckbox')
+        let priorityButtons = document.getElementsByClassName('priorityButton')
+        
 
         const priorities = ['high', 'normal', 'low']
         const dataLayer = []
@@ -178,6 +186,42 @@
             })
         }
 
+        // pbReference = priorityButtonReference
+        const createPriorityEventListener = (pbReference) => {
+            pbReference.addEventListener('click', event => {
+                // Change task object in data layer for checkbox to
+                // have completeness set to true
+
+                // Split our ID on the dash
+                const data = pbReference.id.split('-')
+                
+                // Grab the relevant ID from the 1st element in the array
+                const priorityID = data[1]
+
+                // Iterate over the data layer, looking for the task we've just clicked on
+                const priorityIndex = dataLayer.findIndex(taskIndex => taskIndex.id == priorityID)
+                
+                // Change the value of the completeness property at datalayer[index] to true
+                const taskObject = dataLayer[priorityIndex]
+                
+                // Set the value of complete to the opposite of what it already is
+
+                // Identify current priority index
+                let i = priorities.indexOf(taskObject.priority)
+
+                // Increment our desired index unless we are at the last element of the array
+                const maxIndex = priorities.length - 1
+                i = (i >= maxIndex) ? 0 : i += 1
+
+                // Change to the next priority value
+                taskObject.priority = priorities[i]
+                dataLayer[priorityIndex] = taskObject
+
+                renderDataLayer(dataLayer)
+                priorityListeners()
+            })
+        }
+
         // Define an object factory that will accept our data and return a task object
         const taskFactory = (description, priority, dueDate) => {
             const complete = false
@@ -188,8 +232,6 @@
 
         // Define a factory that returns HTML based on the contents of the task object
         const taskHTML = (targetTask) => {
-            // TODO: Make sure that if a task is completed, the checkbox
-            // renders as checked
             let taskColor = 'text-normal'
 
             switch (targetTask.priority) {
@@ -206,22 +248,21 @@
                                     <button class="btn btn-outline-secondary ${taskColor} font-weight-bold" type="button" id="button-addon2">${targetTask.dueDate}</button>
                                 </div>` : `&nbsp;`
 
-            let description = `<input type="text" class="form-control ${taskColor} font-weight-bold" value="${targetTask.description}" readonly>`
+            const strikethrough = targetTask.complete ? 'strike' : null
+            const boxChecked = targetTask.complete ? 'checked' : null
 
-            if (targetTask.complete) {
-                description = `<s>${description}</s>`
-            }
+            const description = `<input type="text" class="form-control ${strikethrough} ${taskColor} font-weight-bold" value="${targetTask.description}" readonly>`
 
             const html = `<div class="row">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="checkbox" class="taskCheckbox" id="checkbox-${targetTask.id}">
+                                    <input type="checkbox" class="taskCheckbox" id="checkbox-${targetTask.id}" ${boxChecked}>
                                 </div>
                             </div>
                             ${description}
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary ${taskColor}" type="button" id="button-addon2"><i class="fas fa-exclamation-triangle"></i></button>
+                                <button class="btn btn-outline-secondary ${taskColor} priorityButton" type="button" id="priority-${targetTask.id}"><i class="fas fa-exclamation-triangle"></i></button>
                             </div>
                             ${dateButton}
                         </div>
@@ -250,6 +291,13 @@
 
             for (let i = 0; i < checkboxes.length; i++) {
                 createCheckboxEventListener(checkboxes[i])
+            }
+        }
+
+        const priorityListeners = () => {
+            priorityButtons = document.getElementsByClassName('priorityButton')
+            for (let i = 0; i < priorityButtons.length; i++) {
+                createPriorityEventListener(priorityButtons[i])
             }
         }
 
@@ -317,6 +365,15 @@
                 // TODO: create event listener for newCheckbox
                 createCheckboxEventListener(newestCheckbox)
 
+                // Update priority button references
+                priorityButtons = document.getElementsByClassName('priorityButton')
+
+                const pIndex = priorityButtons.length - 1
+                const newestPriorityButton = priorityButtons[pIndex]
+
+                // TODO: create event listener for newCheckbox
+                createPriorityEventListener(newestPriorityButton)
+
                 // Reset form elements
                 taskDescription.value = null
                 prioritySelect.value = 'normal'
@@ -334,7 +391,7 @@
 
         renderDataLayer(dataLayer)
         checkboxListeners()
-
+        priorityListeners()
         
 
         
