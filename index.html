@@ -32,10 +32,10 @@
                     <button class="btn btn-secondary dropdown-toggle btn-block" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         View
                     </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="#">Complete</a>
-                        <a class="dropdown-item" href="#">Incomplete</a>
-                        <a class="dropdown-item active" href="#">All</a>
+                    <div class="dropdown-menu" id="viewDropdown">
+                        <a class="dropdown-item" href="#" data-status="complete">Complete</a>
+                        <a class="dropdown-item" href="#" data-status="incomplete">Incomplete</a>
+                        <a class="dropdown-item active" href="#" data-status="all">All</a>
                     </div>
                 </div>
 
@@ -43,10 +43,11 @@
                     <button class="btn btn-secondary dropdown-toggle btn-block" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Priority
                     </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="#">High</a>
-                        <a class="dropdown-item" href="#">Normal</a>
-                        <a class="dropdown-item active" href="#">Low</a>
+                    <div class="dropdown-menu" id="priorityDropdown">
+                        <a class="dropdown-item" href="#" data-priority="high">High</a>
+                        <a class="dropdown-item" href="#" data-priority="normal">Normal</a>
+                        <a class="dropdown-item" href="#" data-priority="low">Low</a>
+                        <a class="dropdown-item active" href="#" data-priority="all">All</a>
                     </div>
                 </div>
 
@@ -54,10 +55,10 @@
                     <button class="btn btn-secondary dropdown-toggle btn-block" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Sort Order
                     </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="#">Chronological <i class="fas fa-sort-amount-up-alt"></i></a>
-                        <a class="dropdown-item" href="#">Priority <i class="fas fa-sort-amount-up"></i></a>
-                        <a class="dropdown-item" href="#">Alphabetical <i class="fas fa-sort-alpha-up-alt"></i></a>
+                    <div class="dropdown-menu" id="sortDropdown">
+                        <a class="dropdown-item" href="#" data-sort-type="chronological">Chronological</a>
+                        <a class="dropdown-item" href="#" data-sort-type="priority">Priority <i class="fas fa-sort-amount-up"></i></a>
+                        <a class="dropdown-item" href="#" data-sort-type="alphabetical">Alphabetical <i class="fas fa-sort-alpha-up-alt"></i></a>
                         <!-- <i class="fas fa-sort-alpha-up"></i> -->
                     </div>
                 </div>
@@ -152,10 +153,21 @@
         const taskList = document.getElementById('taskList')
         let checkboxes = document.getElementsByClassName('taskCheckbox')
         let priorityButtons = document.getElementsByClassName('priorityButton')
-        
+        const viewDropdown = document.getElementById('viewDropdown')
+        const priorityDropdown = document.getElementById('priorityDropdown')
+        const sortDropdown = document.getElementById('sortDropdown')
 
         const priorities = ['high', 'normal', 'low']
+        const sortOrder = ['ascending', 'descending', null]
         const dataLayer = []
+        
+        let viewMode = 'all'
+        let priorityMode = 'all'
+        let dateSort = null
+        let prioritySort = null
+        
+        // Alphabetical sort
+        let abcSort = null
 
         let taskID = 1
 
@@ -182,11 +194,10 @@
                 dataLayer[checkboxIndex] = taskObject
 
                 renderDataLayer(dataLayer)
-                checkboxListeners()
+                addListeners()
             })
         }
 
-        // pbReference = priorityButtonReference
         const createPriorityEventListener = (pbReference) => {
             pbReference.addEventListener('click', event => {
                 // Change task object in data layer for checkbox to
@@ -218,7 +229,7 @@
                 dataLayer[priorityIndex] = taskObject
 
                 renderDataLayer(dataLayer)
-                priorityListeners()
+                addListeners()
             })
         }
 
@@ -274,7 +285,39 @@
             // Clear our task list
             taskList.innerHTML = ''
 
-            tasks.forEach(task => {
+            const filteredView = tasks.filter(task => {
+                if (viewMode === 'complete' && task.complete === true) {
+                    return true
+                }
+                
+                if (viewMode === 'incomplete' && task.complete === false) {
+                    return true
+                }
+
+                if (viewMode === 'all') {
+                    return true
+                }
+            })
+
+            const filteredPriorities = filteredView.filter(task => {
+                if (priorityMode === task.priority) {
+                    return true
+                }
+
+                if (priorityMode === 'all') {
+                    return true
+                }
+            })
+
+            // Render description alphabetically, if desired
+            // filteredPriorities.sort((firstTask, secondTask) => {
+
+            // })
+            // Render in order of due date, if desired
+
+            // Render in order of priority, if desired
+
+            filteredPriorities.forEach(task => {
                 // Run our tasks through our HTML factory
                 // Generate our html
                 const htmlString = taskHTML(task)
@@ -299,6 +342,11 @@
             for (let i = 0; i < priorityButtons.length; i++) {
                 createPriorityEventListener(priorityButtons[i])
             }
+        }
+
+        const addListeners = () => {
+            priorityListeners()
+            checkboxListeners()
         }
 
         // Event listener for save button on form
@@ -362,7 +410,6 @@
                 // Create event listener for newly created checkbox
                 const newestCheckbox = checkboxes[cIndex]
 
-                // TODO: create event listener for newCheckbox
                 createCheckboxEventListener(newestCheckbox)
 
                 // Update priority button references
@@ -371,7 +418,6 @@
                 const pIndex = priorityButtons.length - 1
                 const newestPriorityButton = priorityButtons[pIndex]
 
-                // TODO: create event listener for newCheckbox
                 createPriorityEventListener(newestPriorityButton)
 
                 // Reset form elements
@@ -385,16 +431,108 @@
             }
         })
 
+        viewDropdown.addEventListener('click', event => {
+            const currentLink = event.target
+
+            // Look at the selected link and get the value
+            const linkValue = currentLink.dataset.status
+
+            // Set our view mode
+            viewMode = linkValue
+
+            // Remove the active class, if set, from other children in this div
+            for (let i = 0; i <= viewDropdown.children.length - 1; i++) {
+                viewDropdown.children[i].classList.remove('active')
+            } 
+            
+            // Add active class to clicked link
+            currentLink.classList.add('active')
+            
+            // Re-render the UI based on the option
+            renderDataLayer(dataLayer)
+
+            // Re-render event listeners
+            addListeners()
+        })
+
+        priorityDropdown.addEventListener('click', event => {
+            const currentLink = event.target
+
+            // Look at the selected link and get the value
+            const linkValue = currentLink.dataset.priority
+
+            // Set our priority mode
+            priorityMode = linkValue
+
+            // Remove the active class, if set, from other children in this div
+            for (let i = 0; i <= priorityDropdown.children.length - 1; i++) {
+                priorityDropdown.children[i].classList.remove('active')
+            } 
+            
+            // Add active class to clicked link
+            currentLink.classList.add('active')
+            
+            // Re-render the UI based on the option
+            renderDataLayer(dataLayer)
+
+            // Re-render event listeners
+            addListeners()
+        })
+
+        sortDropdown.addEventListener('click', event => {
+            const currentLink = event.target
+
+            // Remove the active class, if set, from other children in this div
+            for (let i = 0; i <= sortDropdown.children.length - 1; i++) {
+                sortDropdown.children[i].classList.remove('active')
+            }
+
+            // Look at the selected link and get the value
+            const linkValue = currentLink.dataset.sortType
+
+            const sortOrder = ['ascending', 'descending', null]
+
+            // Update our sorting based on time
+            if (linkValue === 'chronological') {
+                // Change the value of our dateSort from whatever it was
+                // to a new value
+                let i = sortOrder.indexOf(dateSort)
+
+                // Increment our desired index unless we are at the last element of the array
+                const maxIndex = sortOrder.length - 1
+                i = (i >= maxIndex) ? 0 : i += 1
+                dateSort = sortOrder[i]
+
+                // Add appropriate icon
+                if (dateSort === 'ascending') {
+                    currentLink.innerHTML = 'Chronological <i class="fas fa-sort-amount-up-alt"></i>'
+                    currentLink.classList.add('active')
+                } else if (dateSort === 'descending') {
+                    currentLink.innerHTML = 'Chronological <i class="fas fa-sort-amount-up"></i>'
+                    currentLink.classList.add('active')
+                } else {
+                    currentLink.innerHTML = 'Chronological'
+                }
+            }
+
+            // TODO: Update our sorting based on priority
+            // TODO: Update our sorting based on description
+            
+            // Re-render the UI based on the option
+            renderDataLayer(dataLayer)
+
+            // Re-render event listeners
+            addListeners()
+        })
+            
+            
+
         dataLayer[0] = taskFactory('Task One', 'normal', '')
         dataLayer[1] = taskFactory('Task Two', 'normal', '')
         dataLayer[2] = taskFactory('Task Three', 'normal', '')
 
         renderDataLayer(dataLayer)
-        checkboxListeners()
-        priorityListeners()
-        
-
-        
+        addListeners()
         
     </script>
   </body>
