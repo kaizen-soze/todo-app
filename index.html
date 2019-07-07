@@ -57,9 +57,8 @@
                     </button>
                     <div class="dropdown-menu" id="sortDropdown">
                         <a class="dropdown-item" href="#" data-sort-type="chronological">Chronological</a>
-                        <a class="dropdown-item" href="#" data-sort-type="priority">Priority <i class="fas fa-sort-amount-up"></i></a>
-                        <a class="dropdown-item" href="#" data-sort-type="alphabetical">Alphabetical <i class="fas fa-sort-alpha-up-alt"></i></a>
-                        <!-- <i class="fas fa-sort-alpha-up"></i> -->
+                        <a class="dropdown-item" href="#" data-sort-type="priority">Priority</a>
+                        <a class="dropdown-item" href="#" data-sort-type="alphabetical">Alphabetical</a>
                     </div>
                 </div>
 
@@ -226,6 +225,7 @@
 
                 // Change to the next priority value
                 taskObject.priority = priorities[i]
+                taskObject.priorityValue = priorities.indexOf(taskObject.priority)
                 dataLayer[priorityIndex] = taskObject
 
                 renderDataLayer(dataLayer)
@@ -237,8 +237,10 @@
         const taskFactory = (description, priority, dueDate) => {
             const complete = false
             const id = taskID
+            const priorityValue = priorities.indexOf(priority)
             taskID += 1
-            return {description, dueDate, priority, complete, id}
+            
+            return {description, dueDate, priority, priorityValue, complete, id}
         }
 
         // Define a factory that returns HTML based on the contents of the task object
@@ -309,13 +311,61 @@
                 }
             })
 
-            // Render description alphabetically, if desired
-            // filteredPriorities.sort((firstTask, secondTask) => {
-
-            // })
             // Render in order of due date, if desired
 
             // Render in order of priority, if desired
+            if (prioritySort === 'ascending') {
+                filteredPriorities.sort((firstTask, secondTask) => {
+                    if (firstTask.priorityValue < secondTask.priorityValue) {
+                        return 1
+                    }
+
+                    if (firstTask.priorityValue > secondTask.priorityValue) {
+                        return -1
+                    }
+
+                    return 0
+                })
+            } else if (prioritySort === 'descending') {
+                filteredPriorities.sort((firstTask, secondTask) => {
+                    if (firstTask.priorityValue < secondTask.priorityValue) {
+                        return -1
+                    }
+
+                    if (firstTask.priorityValue > secondTask.priorityValue) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            }
+
+            // If abcSort is set to 'ascending', render description alphabetically
+            if (abcSort === 'ascending') {
+                filteredPriorities.sort((firstTask, secondTask) => {
+                    if (firstTask.description < secondTask.description) {
+                        return -1
+                    }
+
+                    if (firstTask.description > secondTask.description) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            } else if (abcSort === 'descending') {
+                filteredPriorities.sort((firstTask, secondTask) => {
+                    if (firstTask.description < secondTask.description) {
+                        return 1
+                    }
+
+                    if (firstTask.description > secondTask.description) {
+                        return -1
+                    }
+
+                    return 0
+                })
+            }
 
             filteredPriorities.forEach(task => {
                 // Run our tasks through our HTML factory
@@ -515,8 +565,50 @@
                 }
             }
 
-            // TODO: Update our sorting based on priority
-            // TODO: Update our sorting based on description
+            // Update our sorting based on priority
+            if (linkValue === 'priority') {
+                // Change the value of our prioritySort from whatever it was
+                // to a new value
+                let i = sortOrder.indexOf(prioritySort)
+
+                // Increment our desired index unless we are at the last element of the array
+                const maxIndex = sortOrder.length - 1
+                i = (i >= maxIndex) ? 0 : i += 1
+                prioritySort = sortOrder[i]
+
+                // Add appropriate icon
+                if (prioritySort === 'ascending') {
+                    currentLink.innerHTML = 'Priority <i class="fas fa-sort-amount-up-alt"></i>'
+                    currentLink.classList.add('active')
+                } else if (prioritySort === 'descending') {
+                    currentLink.innerHTML = 'Priority <i class="fas fa-sort-amount-up"></i>'
+                    currentLink.classList.add('active')
+                } else {
+                    currentLink.innerHTML = 'Priority'
+                }
+            }
+            // Update our sorting based on description
+            if (linkValue === 'alphabetical') {
+                // Change the value of our abcSort from whatever it was
+                // to a new value
+                let i = sortOrder.indexOf(abcSort)
+
+                // Increment our desired index unless we are at the last element of the array
+                const maxIndex = sortOrder.length - 1
+                i = (i >= maxIndex) ? 0 : i += 1
+                abcSort = sortOrder[i]
+
+                // Add appropriate icon
+                if (abcSort === 'ascending') {
+                    currentLink.innerHTML = 'Alphabetical <i class="fas fa-sort-alpha-up"></i>'
+                    currentLink.classList.add('active')
+                } else if (abcSort === 'descending') {
+                    currentLink.innerHTML = 'Alphabetical <i class="fas fa-sort-alpha-up-alt"></i>'
+                    currentLink.classList.add('active')
+                } else {
+                    currentLink.innerHTML = 'Alphabetical'
+                }
+            }
             
             // Re-render the UI based on the option
             renderDataLayer(dataLayer)
